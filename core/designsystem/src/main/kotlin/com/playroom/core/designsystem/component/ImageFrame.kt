@@ -9,13 +9,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import com.playroom.core.designsystem.theme.PlayroomCorner
-import androidx.compose.ui.graphics.graphicsLayer
 
 /**
  * The right-side tilted artwork frame used on the home hero/recommend cards
@@ -32,7 +32,7 @@ fun PlayroomImageFrame(
 ) {
     Box(
         modifier = modifier
-            .graphicsLayer { rotationZ = rotationDegrees }
+            .rotate(rotationDegrees)
             .clip(RoundedCornerShape(cornerRadius)),
     ) {
         Image(
