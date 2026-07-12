@@ -1,2 +1,5 @@
-// Root of the build-logic included build. Nothing to build here directly;
-// all convention plugins live in the :convention module.
+dependencies {
+    implementation(libs.android.gradlePlugin)
+    implementation(libs.kotlin.gradlePlugin)
+    implementation(libs.compose.compiler.gradlePlugin)
+}
