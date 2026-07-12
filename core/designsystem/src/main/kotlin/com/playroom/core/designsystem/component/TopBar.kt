@@ -31,6 +31,7 @@ import com.playroom.core.designsystem.theme.PlayroomCorner
 import com.playroom.core.designsystem.theme.PlayroomSpacing
 import com.playroom.core.designsystem.theme.PlayroomTheme
 import com.playroom.core.designsystem.theme.isCompactWidth
+import androidx.compose.foundation.layout.safeDrawing
 
 /**
  * Shared top bar: brand mark + "PLAYROOM" wordmark on the left, an optional
