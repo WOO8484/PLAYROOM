@@ -14,8 +14,9 @@ kotlin {
 }
 
 dependencies {
-    compileOnly(libs.android.gradlePlugin)
-    compileOnly(libs.kotlin.gradlePlugin)
+    implementation(libs.android.gradlePlugin)
+    implementation(libs.kotlin.gradlePlugin)
+    implementation(libs.compose.compiler.gradlePlugin)
 }
 
 // Precompiled script plugins under src/main/kotlin are auto-registered by
