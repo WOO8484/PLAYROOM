@@ -2,6 +2,7 @@ package com.playroom.feature.home
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import com.playroom.core.designsystem.theme.PlayroomTheme
 
@@ -11,7 +12,7 @@ private fun HomeScreenCompactPreview() {
     PlayroomTheme {
         HomeRoute(
             onNavigateToPlayer = {},
-            contentPadding = PaddingValues(0),
+            contentPadding = PaddingValues(0.dp),
             viewModel = HomeViewModel(),
         )
     }
@@ -23,7 +24,7 @@ private fun HomeScreenRegularPreview() {
     PlayroomTheme {
         HomeRoute(
             onNavigateToPlayer = {},
-            contentPadding = PaddingValues(0),
+            contentPadding = PaddingValues(0.dp),
             viewModel = HomeViewModel(),
         )
     }

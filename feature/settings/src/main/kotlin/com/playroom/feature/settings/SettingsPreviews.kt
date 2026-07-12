@@ -3,6 +3,7 @@ package com.playroom.feature.settings
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.playroom.core.designsystem.theme.PlayroomTheme
 import com.playroom.core.model.AppSkin
 
@@ -15,7 +16,7 @@ private fun SettingsScreenPreview() {
             onSkinSelected = {},
             onManageGameFolder = {},
             onReplayOnboarding = {},
-            contentPadding = PaddingValues(0),
+            contentPadding = PaddingValues(0.dp),
             viewModel = SettingsViewModel(),
         )
     }

@@ -3,6 +3,7 @@ package com.playroom.feature.library
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.playroom.core.designsystem.theme.PlayroomTheme
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800, name = "Library - compact 360dp")
@@ -11,7 +12,7 @@ private fun LibraryScreenCompactPreview() {
     PlayroomTheme {
         LibraryRoute(
             onNavigateToPlayer = {},
-            contentPadding = PaddingValues(0),
+            contentPadding = PaddingValues(0.dp),
             viewModel = LibraryViewModel(),
         )
     }
@@ -23,7 +24,7 @@ private fun LibraryScreenRegularPreview() {
     PlayroomTheme {
         LibraryRoute(
             onNavigateToPlayer = {},
-            contentPadding = PaddingValues(0),
+            contentPadding = PaddingValues(0.dp),
             viewModel = LibraryViewModel(),
         )
     }
