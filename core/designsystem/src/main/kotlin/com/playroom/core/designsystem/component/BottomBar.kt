@@ -30,6 +30,7 @@ import com.playroom.core.designsystem.theme.PlayroomSpacing
 import com.playroom.core.designsystem.theme.PlayroomTheme
 import com.playroom.core.designsystem.theme.PlayroomType
 import com.playroom.core.designsystem.theme.isCompactWidth
+import androidx.compose.foundation.layout.safeDrawing
 
 /**
  * One entry in [PlayroomBottomBar]. Deliberately independent from
