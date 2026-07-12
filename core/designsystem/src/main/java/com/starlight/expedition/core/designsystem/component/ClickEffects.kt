@@ -1,7 +1,7 @@
 package com.starlight.expedition.core.designsystem.component
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.MutableInteractionSource
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.remember
