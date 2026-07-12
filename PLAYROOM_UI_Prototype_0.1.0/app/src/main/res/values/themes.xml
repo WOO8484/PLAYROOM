@@ -1,0 +1,11 @@
+<resources>
+    <!-- Minimal pre-Compose theme: only the launch background + system bar
+         appearance matter, since the whole UI is drawn by Jetpack Compose. -->
+    <style name="Theme.Playroom" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/playroom_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>
