@@ -16,7 +16,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import com.playroom.core.designsystem.theme.PlayroomCorner
-import androidx.compose.ui.graphics.graphicsLayer
 
 /**
  * The right-side tilted artwork frame used on the home hero/recommend cards
