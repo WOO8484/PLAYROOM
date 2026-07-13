@@ -43,36 +43,53 @@ jobs:
             echo
             echo "=== JAVA ==="
             java -version
-            echo
-            echo "=== REQUIRED FILES ==="
-            test -f settings.gradle.kts && echo "OK settings.gradle.kts"
-            test -f build.gradle.kts && echo "OK build.gradle.kts"
-            test -f gradlew && echo "OK gradlew"
-            test -f gradle/wrapper/gradle-wrapper.properties && echo "OK wrapper properties"
-            test -f gradle/wrapper/gradle-wrapper.jar && echo "OK wrapper jar"
           } > build-logs/environment.log 2>&1
 
-      - name: Build debug APK
-        id: gradle_build
+      - name: Verify complete project structure
+        id: structure_check
         continue-on-error: true
         shell: bash
         run: |
           set -o pipefail
-          ./gradlew             --no-daemon             --stacktrace             --info             --warning-mode all             :app:assembleDebug             2>&1 | tee build-logs/assembleDebug-full.log
+          python3 scripts/verify_project_structure.py \
+            2>&1 | tee build-logs/project-structure.log
+          exit "${PIPESTATUS[0]}"
+
+      - name: Build debug APK
+        id: gradle_build
+        if: steps.structure_check.outcome == 'success'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew \
+            --no-daemon \
+            --stacktrace \
+            --info \
+            --warning-mode all \
+            :app:assembleDebug \
+            2>&1 | tee build-logs/assembleDebug-full.log
           exit "${PIPESTATUS[0]}"
 
       - name: Collect error summary and APK locations
         if: always()
         shell: bash
         run: |
+          touch build-logs/assembleDebug-full.log
           {
+            echo "=== STRUCTURE CHECK OUTCOME ==="
+            echo "${{ steps.structure_check.outcome }}"
+            echo
             echo "=== BUILD STEP OUTCOME ==="
             echo "${{ steps.gradle_build.outcome }}"
             echo
             echo "=== FIRST IMPORTANT ERRORS ==="
-            grep -n -m 150 -E               '(^e: |FAILURE:|What went wrong:|Execution failed for task|Caused by:|Could not resolve|Could not find|Unresolved reference|error: )'               build-logs/assembleDebug-full.log || true
+            grep -n -m 150 -E \
+              '(^e: |FAILURE:|What went wrong:|Execution failed for task|Caused by:|Could not resolve|Could not find|Unresolved reference|error: |MISSING FILE|EMPTY FILE|MISSING MODULE|INVALID WRAPPER|NESTED PROJECT)' \
+              build-logs/project-structure.log \
+              build-logs/assembleDebug-full.log || true
             echo
-            echo "=== LAST 400 LINES ==="
+            echo "=== LAST 400 BUILD LINES ==="
             tail -n 400 build-logs/assembleDebug-full.log || true
             echo
             echo "=== APK SEARCH ==="
@@ -91,7 +108,7 @@ jobs:
           retention-days: 30
 
       - name: Upload debug APK
-        if: steps.gradle_build.outcome == 'success'
+        if: steps.structure_check.outcome == 'success' && steps.gradle_build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: StarlightExpedition-debug-apk
@@ -100,11 +117,11 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Mark workflow failed when Gradle failed
-        if: steps.gradle_build.outcome != 'success'
+      - name: Mark workflow failed
+        if: steps.structure_check.outcome != 'success' || steps.gradle_build.outcome != 'success'
         shell: bash
         run: |
-          echo "Gradle build failed."
-          echo "Download artifact: StarlightExpedition-full-build-logs"
+          echo "Project verification or Gradle build failed."
+          echo "Download: StarlightExpedition-full-build-logs"
           echo "Open error-summary.log first."
           exit 1
