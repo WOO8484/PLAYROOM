@@ -40,7 +40,7 @@ fun GameListRow(
         modifier = modifier
             .fillMaxWidth()
             .clip(StarlightTheme.shapes.gameRow)
-            .background(colors.surface.copy(alpha = 0.88f))
+            .background(colors.surface)
             .border(1.dp, colors.line, StarlightTheme.shapes.gameRow)
             .padding(horizontal = 15.dp, vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically

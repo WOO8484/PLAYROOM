@@ -1,6 +1,7 @@
 package com.starlight.expedition.core.designsystem.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.offset
@@ -10,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
@@ -33,7 +35,8 @@ fun CoverFrame(
     painter: Painter,
     contentDescription: String?,
     modifier: Modifier = Modifier,
-    colorFilter: ColorFilter? = null
+    colorFilter: ColorFilter? = null,
+    decorationBrush: Brush? = null
 ) {
     BoxWithConstraints(modifier = modifier) {
         val cardWidth = maxWidth
@@ -55,6 +58,9 @@ fun CoverFrame(
                 .size(frameSize)
                 .graphicsLayer { rotationZ = -5f }
                 .clip(RoundedCornerShape(cornerRadius))
+                .let { frameModifier ->
+                    if (decorationBrush != null) frameModifier.background(decorationBrush) else frameModifier
+                }
         ) {
             Image(
                 painter = painter,

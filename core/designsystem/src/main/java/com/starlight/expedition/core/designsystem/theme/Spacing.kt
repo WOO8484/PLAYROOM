@@ -1,5 +1,9 @@
 package com.starlight.expedition.core.designsystem.theme
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -37,6 +41,21 @@ data class StarlightSpacing(
 }
 
 val LocalStarlightSpacing = StarlightSpacing()
+
+/**
+ * 콘텐츠 하단과 하단 메뉴 사이에 확보해야 하는 실제 안전 여백입니다.
+ *
+ * 계산식(실행지시서 5절 권장 계산 개념 그대로):
+ * 하단 메뉴 높이 + 메뉴 하단 간격 + 시스템 내비게이션 바 높이(WindowInsets.navigationBars) + 콘텐츠-메뉴 사이 16dp([lg])
+ *
+ * 빠른 시작 / 홈 / 즐겨찾기 / 게임리스트가 모두 이 함수 하나만 사용해야 합니다.
+ * 화면별로 별도 여백을 더 얹으면 중복 계산으로 공간이 과도하게 커지므로 금지합니다.
+ */
+@Composable
+fun StarlightSpacing.contentBottomSafePadding(): Dp {
+    val systemNavigationBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    return bottomNavHeight + bottomNavBottomGap + systemNavigationBarHeight + lg
+}
 
 /**
  * 화면 기준 너비(393dp)입니다. 600dp 이상 화면에서는 이 너비로 중앙 고정합니다.

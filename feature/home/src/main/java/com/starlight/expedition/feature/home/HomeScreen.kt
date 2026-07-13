@@ -1,5 +1,6 @@
 package com.starlight.expedition.feature.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import com.starlight.expedition.core.designsystem.component.PlayTrailingButton
 import com.starlight.expedition.core.designsystem.component.SummaryCard
 import com.starlight.expedition.core.designsystem.component.scaleClickable
 import com.starlight.expedition.core.designsystem.theme.StarlightTheme
+import com.starlight.expedition.core.designsystem.theme.contentBottomSafePadding
 import com.starlight.expedition.core.model.Game
 import kotlinx.datetime.Clock
 
@@ -36,8 +38,9 @@ fun HomeScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(colors.appBackground)
             .padding(horizontal = spacing.screenHorizontal)
-            .padding(top = 6.dp, bottom = spacing.navSafeHeight)
+            .padding(top = 6.dp, bottom = spacing.contentBottomSafePadding())
     ) {
         PageHeading(title = "홈", description = "오늘의 플레이를 한눈에 확인하세요.")
 

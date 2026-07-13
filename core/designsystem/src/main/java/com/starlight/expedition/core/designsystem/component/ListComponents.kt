@@ -33,7 +33,7 @@ fun GameSearchField(
             .fillMaxWidth()
             .height(50.dp)
             .clip(StarlightTheme.shapes.searchBox)
-            .background(colors.surface.copy(alpha = 0.86f))
+            .background(colors.surface)
             .border(1.dp, colors.line, StarlightTheme.shapes.searchBox)
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically

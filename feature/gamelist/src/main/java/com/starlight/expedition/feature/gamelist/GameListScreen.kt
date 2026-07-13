@@ -1,5 +1,6 @@
 package com.starlight.expedition.feature.gamelist
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,6 +20,7 @@ import com.starlight.expedition.core.designsystem.component.GameSearchField
 import com.starlight.expedition.core.designsystem.component.GenreChip
 import com.starlight.expedition.core.designsystem.component.PageHeading
 import com.starlight.expedition.core.designsystem.theme.StarlightTheme
+import com.starlight.expedition.core.designsystem.theme.contentBottomSafePadding
 import com.starlight.expedition.core.model.Game
 import com.starlight.expedition.core.model.GameGenre
 
@@ -40,11 +42,13 @@ fun GameListScreen(
     onToggleFavorite: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = StarlightTheme.colors
     val spacing = StarlightTheme.spacing
 
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(colors.appBackground)
             .padding(horizontal = spacing.screenHorizontal)
             .padding(top = 6.dp)
     ) {
@@ -82,7 +86,7 @@ fun GameListScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = spacing.scrollListContentBottomPadding),
+                contentPadding = PaddingValues(bottom = spacing.contentBottomSafePadding()),
                 verticalArrangement = Arrangement.spacedBy(11.dp)
             ) {
                 items(items = uiState.games, key = Game::id) { game ->

@@ -39,6 +39,7 @@ import com.starlight.expedition.core.designsystem.component.CardActionEmphasis
 import com.starlight.expedition.core.designsystem.component.CoverFrame
 import com.starlight.expedition.core.designsystem.component.MainActionButton
 import com.starlight.expedition.core.designsystem.theme.StarlightTheme
+import com.starlight.expedition.core.designsystem.theme.contentBottomSafePadding
 import com.starlight.expedition.core.model.Game
 import com.starlight.expedition.core.model.Recommendation
 import kotlinx.coroutines.delay
@@ -58,13 +59,15 @@ fun QuickStartScreen(
     onRandomRecommendation: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = StarlightTheme.colors
     val spacing = StarlightTheme.spacing
 
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(colors.appBackground)
             .padding(horizontal = spacing.screenHorizontal)
-            .padding(top = 6.dp, bottom = spacing.navSafeHeight),
+            .padding(top = 6.dp, bottom = spacing.contentBottomSafePadding()),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         val continueGame = uiState.continueGame
@@ -118,11 +121,7 @@ private fun ContinueCard(
     Box(
         modifier = modifier
             .clip(StarlightTheme.shapes.featureCard)
-            .background(
-                Brush.linearGradient(
-                    listOf(colors.cardGradientStart, colors.cardGradientMid, colors.cardGradientEnd)
-                )
-            )
+            .background(colors.surface)
             .border(1.dp, colors.cardBorder, StarlightTheme.shapes.featureCard)
     ) {
         Crossfade(
@@ -135,6 +134,9 @@ private fun ContinueCard(
                     if (index == 0) StarlightCoverArt.starlight else StarlightCoverArt.heroLegend
                 ),
                 contentDescription = if (index == 0) "별빛 모험대 게임 커버" else "용사의 전설 게임 커버",
+                decorationBrush = Brush.linearGradient(
+                    listOf(colors.cardGradientStart, colors.cardGradientMid, colors.cardGradientEnd)
+                ),
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -207,17 +209,16 @@ private fun RecommendedCard(
     Box(
         modifier = modifier
             .clip(StarlightTheme.shapes.featureCard)
-            .background(
-                Brush.linearGradient(
-                    listOf(colors.cardGradientStart, colors.cardGradientMid, colors.cardGradientEnd)
-                )
-            )
+            .background(colors.surface)
             .border(1.dp, colors.cardBorder, StarlightTheme.shapes.featureCard)
     ) {
         CoverFrame(
             painter = painterResource(StarlightCoverArt.heroLegend),
             contentDescription = "${game.titleKo} 게임 커버",
             colorFilter = colorFilter,
+            decorationBrush = Brush.linearGradient(
+                listOf(colors.cardGradientStart, colors.cardGradientMid, colors.cardGradientEnd)
+            ),
             modifier = Modifier.fillMaxSize()
         )
 

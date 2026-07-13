@@ -28,7 +28,7 @@ fun SummaryCard(
         modifier = modifier
             .fillMaxSize()
             .clip(StarlightTheme.shapes.summaryCard)
-            .background(colors.surface.copy(alpha = 0.86f))
+            .background(colors.surface)
             .border(1.dp, colors.line, StarlightTheme.shapes.summaryCard)
             .padding(vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

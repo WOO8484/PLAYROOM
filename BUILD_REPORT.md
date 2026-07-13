@@ -1,106 +1,190 @@
-# BUILD REPORT — 별빛 탐험대 Android 네이티브 1차 개발
+# BUILD REPORT — 별빛 탐험대 UI 안정화 (Stabilization v1.0)
 
-## 빌드 결과: 실패 (이 작업 환경 한정 / 네트워크 제한)
+## 빌드 결과: 로컬 Gradle 컴파일 미검증 (이 작업 환경 한정 / 네트워크 제한), 코드 수정은 완료
 
-`./gradlew :app:assembleDebug`를 이 작업 환경(샌드박스)에서 실행했고,
-**Gradle 배포본 다운로드 단계에서 실패**했습니다. 소스 코드 작성과 프로젝트 구조는
-모두 완료되었지만, 이 환경의 외부 네트워크 접근 제한 때문에 마지막 컴파일 단계까지
-진행하지 못했습니다. 아래에 실제로 실행한 명령과 결과를 그대로 남깁니다.
+이 문서는 `CLAUDE_작업지시서_v1.0.md`에 따라 실제로 수정한 내용과, 이 샌드박스
+환경에서 실제로 실행해 본 명령·결과를 그대로 남깁니다. 빌드를 성공했다고
+거짓으로 보고하지 않습니다.
 
-## 실제로 확인한 것
+---
 
-1. **`gradle-wrapper.jar` 확보 및 `gradlew` 정상 동작 확인**
-   이 환경은 `services.gradle.org`(Gradle 공식 배포처) 접근이 차단되어 있어 표준 방식으로는
-   wrapper jar를 받을 수 없었습니다. 대신 이미 네트워크 허용 목록에 있는
-   `raw.githubusercontent.com`을 통해 Gradle 공식 저장소(`gradle/gradle`)에 포함된
-   `gradle-wrapper.jar`를 내려받아 배치했습니다. 이후 아래 명령이 정상적으로
-   `GradleWrapperMain`을 실행하는 것까지 확인했습니다.
+## 수정한 파일
 
-   ```bash
-   $ ./gradlew --version
-   Fetching distribution.
-   Downloading https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
-   Attempt 1/1 failed. Reason: Server returned HTTP response code: 403 for URL:
-   https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
-   Exception in thread "main" java.io.IOException: Server returned HTTP response code: 403 ...
-   ```
+- `app/src/main/java/com/starlight/expedition/StarlightApp.kt`
+- `core/designsystem/src/main/java/com/starlight/expedition/core/designsystem/theme/Spacing.kt`
+- `core/designsystem/src/main/java/com/starlight/expedition/core/designsystem/theme/StarlightColors.kt`
+- `core/designsystem/src/main/java/com/starlight/expedition/core/designsystem/component/CoverFrame.kt`
+- `core/designsystem/src/main/java/com/starlight/expedition/core/designsystem/component/HomeComponents.kt`
+- `core/designsystem/src/main/java/com/starlight/expedition/core/designsystem/component/GameListRow.kt`
+- `core/designsystem/src/main/java/com/starlight/expedition/core/designsystem/component/ListComponents.kt`
+- `feature/quickstart/src/main/java/com/starlight/expedition/feature/quickstart/QuickStartScreen.kt`
+- `feature/home/src/main/java/com/starlight/expedition/feature/home/HomeScreen.kt`
+- `feature/favorites/src/main/java/com/starlight/expedition/feature/favorites/FavoritesScreen.kt`
+- `feature/gamelist/src/main/java/com/starlight/expedition/feature/gamelist/GameListScreen.kt`
 
-   즉 `gradlew` 스크립트, `gradle-wrapper.properties`, `gradle-wrapper.jar` 자체는
-   모두 정상 동작했고, 그다음 필요한 "실제 Gradle 배포본 다운로드"에서 막혔습니다.
+지시서 2절의 수정·삭제·이동 금지 파일(워크플로, gradlew, wrapper jar/properties,
+libs.versions.toml, 루트/모듈 `build.gradle.kts`, `AndroidManifest.xml`,
+`cover_starlight.png`, `cover_hero_legend.png`)은 위 목록에 없으며, 실제로
+건드리지 않았습니다. 모듈 구조(11개 모듈)와 패키지명도 그대로 유지했습니다.
 
-2. **네트워크 제한 범위 확인**
-   빌드에 필요한 아래 호스트들을 직접 확인했고, 전부 이 환경에서 403으로 차단되어 있습니다.
+## 페이지 잔상 제거 방법 (3절)
 
-   ```text
-   https://services.gradle.org   -> 403 (Gradle 배포본)
-   https://dl.google.com         -> 403 (Android SDK, Google Maven)
-   https://maven.google.com      -> 403 (Jetpack/Compose 라이브러리)
-   https://repo1.maven.org       -> 403 (Maven Central)
-   https://plugins.gradle.org    -> 403 (Gradle Plugin Portal)
-   ```
+- `StarlightApp.kt`의 `NavHost`에 `enterTransition`, `exitTransition`,
+  `popEnterTransition`, `popExitTransition`을 모두 `{ EnterTransition.None }` /
+  `{ ExitTransition.None }`으로 명시해 화면 전환 애니메이션을 전부 껐습니다.
+  이전 화면과 새 화면이 겹쳐 그려지거나 동시에 페이드되는 구간이 없습니다.
+- `NavHost`를 감싸는 `Box(weight(1f))`에 `colors.appBackground`로 불투명 배경을
+  추가하고, 빠른 시작·홈·즐겨찾기·게임리스트 화면 각각의 최상위 `Column`에도
+  동일한 불투명 배경을 추가했습니다. 화면 전환 순간에도 이전 화면이 비쳐
+  보이지 않습니다.
+- 하단 메뉴 선택(`saveState`/`restoreState`/`launchSingleTop`) 로직은
+  손대지 않고 그대로 유지했습니다.
+- 카드 내부 대표 이미지 크로스페이드(빠른 시작 첫 카드)와 페이지 전환
+  애니메이션을 분리된 상태로 유지했습니다(카드 내부 `Crossfade`는 그대로,
+  페이지 전체 `Crossfade`/`AnimatedContent`는 추가하지 않음).
 
-   이 네 가지가 전부 열려야 `com.android.application`, `org.jetbrains.kotlin.android`,
-   AndroxidX/Compose 의존성, Gradle 실행 파일 자체를 받을 수 있습니다. 이 작업 환경은
-   `github.com`, `raw.githubusercontent.com`, `pypi.org`, `npmjs.com`,
-   `archive.ubuntu.com` 등 제한된 목록만 허용하고 있어, 이 네 가지 호스트는 대체 경로도
-   찾지 못했습니다.
+## 하단 안전 여백 계산 방법 (5절)
 
-3. **결론**
-   이 환경에서는 물리적으로 Android/Gradle 빌드를 끝까지 실행할 수 없습니다. 소스
-   코드·Gradle 설정·리소스는 표준적인 최신 Jetpack Compose 멀티모듈 프로젝트 구조와
-   문법을 따랐고, 인터넷이 열려 있는 일반 개발 PC나 Android Studio에서는
-   `./gradlew clean :app:assembleDebug`가 정상적으로 진행되어야 합니다. 다만 이 환경
-   안에서는 그 결과를 직접 검증하지 못했다는 점을 분명히 남깁니다.
+기존 코드는 화면마다 `navSafeHeight`(고정 18dp) 또는 여기에 `bottomNavContentExtra`
+(24dp)를 더 얹은 `scrollListContentBottomPadding`을 섞어 써서, 화면별로 여백이
+서로 다르고 시스템 내비게이션 바 실제 높이를 반영하지 못했습니다.
 
-## APK 경로
+`Spacing.kt`에 아래 공용 함수 하나를 추가하고, 4개 화면(빠른 시작/홈/즐겨찾기/
+게임리스트) 모두 이 함수 하나만 쓰도록 통일했습니다.
 
-`app/build/outputs/apk/debug/app-debug.apk` — **이번 작업에서는 생성되지 못했습니다.**
-인터넷이 열려 있는 환경에서 위 빌드 명령을 실행하면 이 경로에 생성됩니다.
+```kotlin
+@Composable
+fun StarlightSpacing.contentBottomSafePadding(): Dp {
+    val systemNavigationBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    return bottomNavHeight + bottomNavBottomGap + systemNavigationBarHeight + lg  // lg = 16dp
+}
+```
 
-## 테스트
+지시서 5절의 권장 계산 개념(하단 메뉴 높이 + 메뉴 하단 간격 + 시스템 내비게이션
+바 높이 + 콘텐츠-메뉴 사이 16dp)을 그대로 구현했으며, 고정 숫자 대신
+`WindowInsets.navigationBars`로 실제 시스템 바 높이를 반영합니다. 기존
+`navSafeHeight`/`scrollListContentBottomPadding` 프로퍼티는 다른 곳에서 더 이상
+참조하지 않도록 모든 사용처를 교체했습니다(하위 호환을 위해 프로퍼티 자체는
+삭제하지 않고 남겨두었습니다).
 
-`./gradlew testDebugUnitTest`, `./gradlew lintDebug`도 같은 이유(의존성 다운로드 불가)로
-이 환경에서 실행하지 못했습니다. 다만 순수 Kotlin 로직에 대한 JUnit 테스트는 작성해
-두었으며, 인터넷이 열린 환경에서 실행하면 검증할 수 있습니다.
+## 변경한 색상 토큰 (6절, 라이트 모드만)
 
-- `core/common/.../SearchUtilsTest.kt` — 검색어 정규화·부분 일치 검증
-- `core/common/.../TimeFormatTest.kt` — 상대 시간·플레이 시간 포맷 검증
-- `core/data/.../GameRepositoryImplTest.kt` — 즐겨찾기 상태 반영, 즐겨찾기 토글,
-  최근 플레이 3개 이하·정렬 검증 (Fake Repository 사용)
+| 토큰 | 이전 | 변경 |
+|---|---|---|
+| `appBackground` | `#F4F6FF` | `#F7F7FC` |
+| `windowBackground` | `#EEF1FB` | `#F7F7FC` (앱 배경과 동일 → 띠 제거) |
+| `textPrimary` | `#171A2A` | `#151724` |
+| `textMuted` | `#747B8F` | `#757988` |
+| `line`(카드 테두리 공용 토큰) | `#1A292E4C`(반투명) | `#ECEAF3`(불투명) |
+| `cardBorder` | `#EBFFFFFF`(반투명) | `#ECEAF3`(불투명) |
+| `navBackground` | `#D6FFFFFF`(반투명) | `#FFFFFF`(불투명) |
+| `navBorder` | `#EBFFFFFF`(반투명) | `#ECEAF3`(불투명) |
+| `surface`(일반 카드) | `#FFFFFF` | 변경 없음(이미 흰색) |
+| `primary` / `primaryVariant`(보라 포인트) | 유지 | 유지 |
 
-## 구현 완료 기능
+다크 모드(`DarkStarlightColors`)는 손대지 않았습니다.
 
-- 빠른 시작 / 홈 / 즐겨찾기 / 게임리스트 / 설정 5개 화면, 플로팅 하단 메뉴
-- 빠른 시작에서만 설정 톱니바퀴 숨김, 나머지 3개 화면에서는 표시
-- 빠른 시작 카드 2개 고정(스크롤 없음), 카드 간 공통 배경판 없음
-- 두 커버 프레임 동일 비율 구현(상단 10.24% / 우측 -13.71% / 높이 74.70% / 모서리 29.84% / -5도)
-- 대표 이미지 크로스페이드(3.5초 간격, 600ms 전환), 화면 이탈·백그라운드 시 자동 정지(Lifecycle 연동)
-- 홈: 전체 스크롤 없음, 요약 카드 3개 + 최근 플레이 3개 동일 높이
-- 즐겨찾기 / 게임리스트: 목록 영역만 스크롤, 마지막 카드가 하단 메뉴에 가려지지 않도록
-  실제 콘텐츠 패딩 적용
-- 게임명 검색(대소문자 무시, 공백 제거, 한글 지원) + 장르 필터 동시 적용, 검색 결과 없음 상태
-- 즐겨찾기 등록·해제 및 DataStore 영구 저장(앱 재실행 후 유지)
-- 다크모드 DataStore 영구 저장, 시스템 다크모드 자동 강제하지 않음, 라이트/다크 대비 확보
-- 랜덤 선택(오늘 뭐 하지? 카드) 동작, 이어 하기·오늘 뭐 하지 카드에 사용 중인 게임은 추천 후보에서 제외
-- 393dp 기준 레이아웃, 600dp 이상 화면에서 393dp 폭 중앙 고정, 태블릿 2열 재배치 없음
-- 상태바·제스처 내비게이션 안전 영역 반영(`statusBarsPadding`, `navigationBarsPadding`)
-- 로딩 / 성공 / 빈 결과 / 오류 상태를 가진 UiState 구조
-- 접근성: 아이콘 버튼 `contentDescription`, 즐겨찾기 상태 설명, 장식 이미지 `contentDescription = null`
-- Toast/Snackbar 형태의 성공 메시지 없음, 기본 직사각형 Ripple 대신 형태에 맞춘 클릭 반응(0.97배 축소)
+추가로, `SummaryCard`(`HomeComponents.kt`), `GameListRow`, `GameSearchField`
+(`ListComponents.kt`)가 `colors.surface.copy(alpha = 0.86f~0.88f)`로 카드를
+반투명하게 그리던 부분을 `colors.surface`(불투명)로 바꿔, 카드와 하단 메뉴
+뒤로 화면 배경이 비치는 문제를 제거했습니다. 임의 색상값을 직접 쓰지 않고
+기존 디자인 토큰만 사용했습니다.
 
-## 미구현 기능 (1차 개발 범위 제외 — 실행지시서 3절 기준)
+빠른 시작 카드(7절)는 카드 배경 자체를 `colors.surface`(흰색)로 바꾸고,
+기존 민트·보라 그라데이션(`cardGradientStart/Mid/End`)은 `CoverFrame`에 추가한
+`decorationBrush` 파라미터로 옮겨 이미지 프레임의 클립 영역 안에서만 그려지도록
+했습니다. 프레임의 기울기·위치·크기 비율, 카드 크기, 버튼 위치는 변경하지
+않았습니다.
 
-Libretro 실행, PPSSPP·기타 외부 에뮬레이터 연동, BIOS 검사, 실제 게임 폴더 스캔, 세이브 파일
-관리, 치트 적용, PSP HD 텍스처 설치, AI 공략 API, 클라우드 동기화, 외부 서버 연결. 이 기능들과
-연결될 예정인 버튼("이어서 하기", "바로 시작", "게임 소개")은 확정 GUI대로 화면에 존재하지만,
-가짜 성공 메시지 없이 동작은 연결하지 않았습니다.
+## 유지한 애니메이션
 
-## 확인이 필요한 실제 오류
+- 빠른 시작 첫 카드 내부 대표 이미지 크로스페이드(3.5초 간격, 600ms
+  `tween`, `Crossfade`) — Lifecycle(`repeatOnLifecycle(STARTED)`)에 연동되어
+  화면을 벗어나면 자동 중단되고 다시 들어오면 새로 시작하는 기존 구조를 그대로
+  유지했습니다. 600ms는 지시서가 허용하는 "현재 수준 유지" 범위입니다.
+- 버튼 눌림 시 0.97배 축소되는 `scaleClickable` 터치 피드백(`ClickEffects.kt`,
+  하단 메뉴/버튼 공통) — 변경 없음.
+- 하단 메뉴 선택 원형 배경(34dp, 아이콘 영역 내부로 제한)은 즉시 색상만
+  바뀌는 방식으로 이미 구현되어 있어 크로스페이드나 잔상이 없습니다. 변경
+  없음.
 
-- 이 환경에서 실제 컴파일을 끝까지 수행하지 못했기 때문에, 문법 오류가 전혀 없다고
-  100% 보장할 수는 없습니다. 작성 후 정적 검토(미사용 import 검사, 죽은 코드 검사,
-  Gradle 스크립트 검토)는 수행했지만, 실제 `kotlinc`/AGP 컴파일 오류 여부는 인터넷이
-  열린 환경에서 첫 `./gradlew :app:assembleDebug` 실행 시 최종 확인이 필요합니다.
-- 커버 프레임 비율·크로스페이드·하단 메뉴 겹침 방지 등은 코드상 수치 그대로 구현했지만,
-  실기기/에뮬레이터에서의 시각적 확인은 이 환경에서 수행하지 못했습니다. Android Studio
-  Preview 또는 에뮬레이터에서 393dp 기준 화면으로 1차 확인을 권장합니다.
+## 제거한 애니메이션
+
+- `NavHost`의 기본 화면 전환 애니메이션(enter/exit/popEnter/popExit)을 전부
+  `None`으로 껐습니다. 이전에는 명시적으로 꺼져 있지 않아 Navigation Compose
+  기본 전환 효과가 남아 있을 수 있었습니다.
+- 페이지 전체에 적용되는 fade/slide/scale/crossfade 효과는 추가하지
+  않았으며, 기존에도 없었습니다.
+
+## 로컬 빌드 명령과 결과
+
+이 작업 환경(샌드박스)에서 실행한 명령과 실제 결과입니다.
+
+```bash
+$ python3 scripts/verify_project_structure.py
+PROJECT STRUCTURE CHECK PASSED
+- root: /home/claude/project
+- Kotlin files: 64
+- required files: 25
+- required modules: 11
+
+$ ./gradlew --no-daemon --stacktrace :app:assembleDebug
+Fetching distribution.
+Downloading https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
+Attempt 1/1 failed. Reason: Server returned HTTP response code: 403 for URL:
+https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
+Exception in thread "main" java.io.IOException: Server returned HTTP response
+code: 403 for URL: https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
+```
+
+이 환경의 네트워크는 `api.github.com`, `github.com`, `raw.githubusercontent.com`,
+`pypi.org`, `npmjs.com`, `archive.ubuntu.com` 등 제한된 목록만 허용하고
+`services.gradle.org`(Gradle 배포본), `dl.google.com`/`maven.google.com`
+(Android SDK·Jetpack/Compose 의존성), `repo1.maven.org`(Maven Central),
+`plugins.gradle.org`(Gradle Plugin Portal)에는 접근할 수 없습니다. 이 네
+호스트가 모두 열려야 `:app:assembleDebug`가 끝까지 진행됩니다. 이 환경에는
+Android SDK와 `kotlinc`도 설치되어 있지 않아, 컴파일러 수준의 정적 검증조차
+로컬에서 수행할 수 없었습니다(이전 `BUILD_REPORT.md`가 남긴 기록과 동일한
+제약입니다).
+
+**따라서 이번 수정에 대해 Kotlin 컴파일 성공을 로컬에서 직접 확인하지
+못했습니다.** 대신 아래를 수행했습니다.
+
+- 수정한 11개 파일 전체를 다시 `view`로 열어 문법(중괄호/괄호 짝, import
+  존재 여부, 함수 시그니처 일치)을 한 줄씩 재검토했습니다.
+- 11절의 컴파일 오류 예방 기준(`getValue`/`setValue` import,
+  `MutableInteractionSource` 경로, nullable 스마트캐스트 지역 변수화)에 걸리는
+  새 코드가 없는지 확인했습니다. 이번 수정에서는 새로운 `by` 위임이나
+  다른 모듈의 nullable 프로퍼티 직접 스마트캐스트를 추가하지 않았습니다.
+  기존 `getValue`/`setValue` import는 그대로 남아 있습니다.
+- 새로 추가한 최상위 함수 `contentBottomSafePadding()`은 `@Composable`
+  확장 함수로 선언했고, 호출하는 4개 화면 모두 `@Composable` 컨텍스트 안에서
+  호출하도록 배치했습니다.
+- `CoverFrame`에 추가한 `decorationBrush: Brush? = null` 파라미터는 기본값이
+  있어 기존 호출부와 하위 호환됩니다.
+
+## GitHub Actions 결과
+
+**실행하지 못했습니다.** 이 작업 환경에는 GitHub Actions를 실행할 수 있는
+권한이나 실제 저장소 접근이 없습니다(코드 조회를 위한 `api.github.com`/
+`github.com` 접근만 허용됨). `.github/workflows/android-build.yml`은 수정하지
+않고 그대로 남겨 두었으므로, 이 ZIP을 실제 GitHub 저장소 루트에 반영한 뒤
+`Build Android APK With Full Logs` 워크플로를 실행해 최종 성공 여부를
+확인해야 합니다.
+
+## APK 생성 경로
+
+`app/build/outputs/apk/debug/app-debug.apk` — 이번 작업에서는 생성되지
+**못했습니다.** 위 네트워크 제약 때문입니다. GitHub Actions 또는 인터넷이
+열린 개발 환경에서 `./gradlew clean :app:assembleDebug`를 실행하면 이 경로에
+생성되어야 합니다.
+
+## 남은 오류
+
+- 실제 Kotlin/AGP 컴파일을 이 환경에서 끝까지 수행하지 못했으므로, 컴파일
+  오류가 전혀 없다고 100% 보장할 수는 없습니다. GitHub Actions에서
+  `:app:assembleDebug`를 1차로 실행해 확인이 필요합니다.
+- 393dp 기준 화면에서의 실제 여백(16dp)·잔상 제거·카드 색상 효과는 코드
+  수치·로직으로는 지시서 요구사항대로 구현했지만, 실기기/에뮬레이터
+  화면 캡처로 13절의 10회 반복 확인은 이 환경에서 수행하지 못했습니다.
+  APK가 만들어진 뒤 실기 확인이 필요합니다.

@@ -1,5 +1,7 @@
 package com.starlight.expedition
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -97,10 +99,18 @@ private fun StarlightAppContent(appContainer: AppContainer) {
             onSettingsClick = { settingsDialogVisible = true }
         )
 
-        Box(modifier = Modifier.weight(1f)) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .background(StarlightTheme.colors.appBackground)
+        ) {
             NavHost(
                 navController = navController,
-                startDestination = StarlightRoute.QUICK_START.route
+                startDestination = StarlightRoute.QUICK_START.route,
+                enterTransition = { EnterTransition.None },
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { ExitTransition.None }
             ) {
                 composable(StarlightRoute.QUICK_START.route) {
                     val viewModel: QuickStartViewModel = viewModel(

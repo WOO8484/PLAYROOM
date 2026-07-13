@@ -1,5 +1,6 @@
 package com.starlight.expedition.feature.favorites
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,6 +16,7 @@ import com.starlight.expedition.core.designsystem.component.FavoriteTrailingButt
 import com.starlight.expedition.core.designsystem.component.GameListRow
 import com.starlight.expedition.core.designsystem.component.PageHeading
 import com.starlight.expedition.core.designsystem.theme.StarlightTheme
+import com.starlight.expedition.core.designsystem.theme.contentBottomSafePadding
 import com.starlight.expedition.core.model.Game
 
 /** 즐겨찾기 화면 전용 상태 문구입니다. 확정 GUI 문구를 게임별로 그대로 옮깁니다. */
@@ -32,11 +34,13 @@ fun FavoritesScreen(
     onToggleFavorite: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = StarlightTheme.colors
     val spacing = StarlightTheme.spacing
 
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(colors.appBackground)
             .padding(horizontal = spacing.screenHorizontal)
             .padding(top = 6.dp)
     ) {
@@ -47,7 +51,7 @@ fun FavoritesScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = spacing.scrollListContentBottomPadding),
+                contentPadding = PaddingValues(bottom = spacing.contentBottomSafePadding()),
                 verticalArrangement = Arrangement.spacedBy(11.dp)
             ) {
                 items(items = uiState.favorites, key = Game::id) { game ->
