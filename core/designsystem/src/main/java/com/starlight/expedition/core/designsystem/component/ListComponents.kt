@@ -111,3 +111,20 @@ fun EmptyResultState(
         Text(text = message, style = StarlightTheme.typography.emptyLabel, color = colors.textMuted)
     }
 }
+
+/** 게임리스트 행에서 플랫폼을 짧게 표시하는 배지입니다. */
+@Composable
+fun PlatformBadge(
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    val colors = StarlightTheme.colors
+    Box(
+        modifier = modifier
+            .clip(StarlightTheme.shapes.chip)
+            .background(colors.primarySoft)
+            .padding(horizontal = 8.dp, vertical = 3.dp)
+    ) {
+        Text(text = label, style = StarlightTheme.typography.chipLabel, color = colors.primary)
+    }
+}

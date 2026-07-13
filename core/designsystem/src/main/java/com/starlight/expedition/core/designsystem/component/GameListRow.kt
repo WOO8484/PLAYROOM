@@ -26,13 +26,16 @@ import com.starlight.expedition.core.designsystem.theme.StarlightTheme
 
 /**
  * 홈 최근 플레이 / 즐겨찾기 / 게임리스트 화면이 공통으로 사용하는 게임 행입니다.
- * 오른쪽 끝 요소만 [trailing]으로 갈아 끼웁니다.
+ * 오른쪽 끝 요소만 [trailing]으로 갈아 끼웁니다. [leading]을 지정하지 않으면
+ * 기존처럼 제목 기반 이모지 썸네일을 보여줍니다. 실제 커버가 있는 화면은
+ * [leading]에 [GameCoverImage]를 넘겨 실제 표지를 보여줄 수 있습니다.
  */
 @Composable
 fun GameListRow(
     titleKo: String,
     subtitle: String,
     modifier: Modifier = Modifier,
+    leading: (@Composable () -> Unit)? = null,
     trailing: @Composable () -> Unit
 ) {
     val colors = StarlightTheme.colors
@@ -45,7 +48,11 @@ fun GameListRow(
             .padding(horizontal = 15.dp, vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        GameThumbnail(titleKo = titleKo)
+        if (leading != null) {
+            leading()
+        } else {
+            GameThumbnail(titleKo = titleKo)
+        }
 
         Column(
             modifier = Modifier

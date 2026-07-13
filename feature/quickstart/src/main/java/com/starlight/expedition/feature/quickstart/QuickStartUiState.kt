@@ -7,5 +7,6 @@ data class QuickStartUiState(
     val loading: Boolean = true,
     val continueGame: Game? = null,
     val recommendation: Recommendation? = null,
+    val hasAnyGames: Boolean = false,
     val errorMessage: String? = null
 )

@@ -5,6 +5,7 @@ import com.starlight.expedition.core.model.Game
 data class HomeUiState(
     val loading: Boolean = true,
     val recentGames: List<Game> = emptyList(),
+    val libraryGameCount: Int = 0,
     val favoriteCount: Int = 0,
     val todayPlayMinutesLabel: String = "0분",
     val errorMessage: String? = null

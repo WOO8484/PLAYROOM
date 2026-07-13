@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -147,6 +148,46 @@ fun SettingsGearButton(
             contentDescription = null,
             tint = tint,
             modifier = Modifier.size(26.dp)
+        )
+    }
+}
+
+/**
+ * 상단 헤더의 게임 폴더 관리 아이콘입니다. 설정 아이콘과 동일한 크기를 쓰고,
+ * 설정 아이콘이 숨겨진 화면(빠른 시작)에서도 항상 표시됩니다.
+ */
+@Composable
+fun GameFolderIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val colors = StarlightTheme.colors
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val tint = if (isPressed) colors.primary else colors.textMuted
+    val scale by animateFloatAsState(if (isPressed) 0.91f else 1f, label = "folderIconScale")
+
+    Box(
+        modifier = modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .semantics { contentDescription = "게임 폴더 관리" },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Filled.FolderOpen,
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(24.dp)
         )
     }
 }

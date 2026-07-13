@@ -18,6 +18,7 @@ required_files = [
     "app/build.gradle.kts",
     "app/proguard-rules.pro",
     "app/src/main/AndroidManifest.xml",
+    "app/src/main/java/com/starlight/expedition/AppContainer.kt",
     "core/common/build.gradle.kts",
     "core/data/build.gradle.kts",
     "core/designsystem/build.gradle.kts",
@@ -28,6 +29,26 @@ required_files = [
     "feature/favorites/build.gradle.kts",
     "feature/gamelist/build.gradle.kts",
     "feature/settings/build.gradle.kts",
+    "feature/library/build.gradle.kts",
+    "feature/library/src/main/java/com/starlight/expedition/feature/library/GameFolderDialog.kt",
+    "feature/library/src/main/java/com/starlight/expedition/feature/library/GameFolderViewModel.kt",
+    "feature/library/src/main/java/com/starlight/expedition/feature/library/GameFolderUiState.kt",
+    "feature/library/src/main/java/com/starlight/expedition/feature/library/GameFolderManagementRow.kt",
+    "core/data/src/main/java/com/starlight/expedition/core/data/scanner/PlatformClassifier.kt",
+    "core/data/src/main/java/com/starlight/expedition/core/data/scanner/GameTitleNormalizer.kt",
+    "core/data/src/main/java/com/starlight/expedition/core/data/scanner/GameFileGrouping.kt",
+    "core/data/src/main/java/com/starlight/expedition/core/data/scanner/DocumentsContractTreeReader.kt",
+    "core/data/src/main/java/com/starlight/expedition/core/data/scanner/GameDocumentScanner.kt",
+    "core/data/src/main/java/com/starlight/expedition/core/data/local/GameLibraryFileStore.kt",
+    "core/data/src/main/java/com/starlight/expedition/core/data/local/GameFolderPreferences.kt",
+    "core/data/src/main/java/com/starlight/expedition/core/data/repository/GameFolderRepository.kt",
+    "core/data/src/main/java/com/starlight/expedition/core/data/repository/GameFolderRepositoryImpl.kt",
+    "core/data/src/main/java/com/starlight/expedition/core/data/image/LocalCoverImageLoader.kt",
+    "core/data/src/test/java/com/starlight/expedition/core/data/scanner/PlatformClassifierTest.kt",
+    "core/data/src/test/java/com/starlight/expedition/core/data/scanner/GameTitleNormalizerTest.kt",
+    "core/data/src/test/java/com/starlight/expedition/core/data/scanner/GameFileGroupingTest.kt",
+    "core/data/src/test/java/com/starlight/expedition/core/data/local/GameLibraryFileStoreTest.kt",
+    "core/data/src/test/java/com/starlight/expedition/core/data/repository/RepositoryTest.kt",
     "core/designsystem/src/main/res/drawable-nodpi/cover_starlight.png",
     "core/designsystem/src/main/res/drawable-nodpi/cover_hero_legend.png",
 ]
@@ -53,20 +74,27 @@ required_modules = [
     ":feature:favorites",
     ":feature:gamelist",
     ":feature:settings",
+    ":feature:library",
 ]
 for module in required_modules:
     if f'include("{module}")' not in settings:
         errors.append(f"MISSING MODULE INCLUDE: {module}")
+
+app_build = (ROOT / "app/build.gradle.kts").read_text(encoding="utf-8")
+if 'project(":feature:library")' not in app_build:
+    errors.append("app/build.gradle.kts MISSING DEPENDENCY: :feature:library")
 
 wrapper = ROOT / "gradle/wrapper/gradle-wrapper.jar"
 if wrapper.exists() and wrapper.stat().st_size < 10_000:
     errors.append("INVALID WRAPPER JAR: file is unexpectedly small")
 
 kotlin_files = list(ROOT.glob("**/*.kt"))
-if len(kotlin_files) < 40:
+if len(kotlin_files) < 90:
     errors.append(f"TOO FEW KOTLIN FILES: {len(kotlin_files)}")
 
 if (ROOT / "StarlightExpedition").is_dir():
+    errors.append("NESTED PROJECT ROOT DETECTED: upload the contents, not an outer project folder")
+if (ROOT / "StarlightExpedition_GameLibrary_v2").is_dir():
     errors.append("NESTED PROJECT ROOT DETECTED: upload the contents, not an outer project folder")
 
 if errors:

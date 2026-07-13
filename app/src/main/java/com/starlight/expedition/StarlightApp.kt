@@ -42,6 +42,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.starlight.expedition.core.designsystem.component.BottomNavBar
+import com.starlight.expedition.core.designsystem.component.GameFolderIconButton
 import com.starlight.expedition.core.designsystem.component.SettingsGearButton
 import com.starlight.expedition.core.designsystem.theme.DesignReferenceWidth
 import com.starlight.expedition.core.designsystem.theme.StarlightTheme
@@ -53,6 +54,8 @@ import com.starlight.expedition.feature.gamelist.GameListScreen
 import com.starlight.expedition.feature.gamelist.GameListViewModel
 import com.starlight.expedition.feature.home.HomeScreen
 import com.starlight.expedition.feature.home.HomeViewModel
+import com.starlight.expedition.feature.library.GameFolderDialog
+import com.starlight.expedition.feature.library.GameFolderViewModel
 import com.starlight.expedition.feature.quickstart.QuickStartScreen
 import com.starlight.expedition.feature.quickstart.QuickStartViewModel
 import com.starlight.expedition.feature.settings.SettingsDialog
@@ -92,11 +95,13 @@ private fun StarlightAppContent(appContainer: AppContainer) {
     val currentRoute = StarlightRoute.fromRoute(backStackEntry?.destination?.route)
 
     var settingsDialogVisible by remember { mutableStateOf(false) }
+    var folderDialogVisible by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         StarlightHeader(
             showsSettingsButton = currentRoute.showsSettingsButton,
-            onSettingsClick = { settingsDialogVisible = true }
+            onSettingsClick = { settingsDialogVisible = true },
+            onFolderClick = { folderDialogVisible = true }
         )
 
         Box(
@@ -126,7 +131,9 @@ private fun StarlightAppContent(appContainer: AppContainer) {
                     val uiState by viewModel.uiState.collectAsState()
                     QuickStartScreen(
                         uiState = uiState,
-                        onRandomRecommendation = viewModel::requestRecommendation
+                        imageLoader = appContainer.localCoverImageLoader,
+                        onRandomRecommendation = viewModel::requestRecommendation,
+                        onAddFolderClick = { folderDialogVisible = true }
                     )
                 }
 
@@ -144,6 +151,7 @@ private fun StarlightAppContent(appContainer: AppContainer) {
                     val uiState by viewModel.uiState.collectAsState()
                     HomeScreen(
                         uiState = uiState,
+                        imageLoader = appContainer.localCoverImageLoader,
                         onViewAllClick = {
                             navController.navigate(StarlightRoute.GAME_LIST.route) {
                                 launchSingleTop = true
@@ -161,6 +169,7 @@ private fun StarlightAppContent(appContainer: AppContainer) {
                     val uiState by viewModel.uiState.collectAsState()
                     FavoritesScreen(
                         uiState = uiState,
+                        imageLoader = appContainer.localCoverImageLoader,
                         onToggleFavorite = viewModel::toggleFavorite
                     )
                 }
@@ -174,8 +183,9 @@ private fun StarlightAppContent(appContainer: AppContainer) {
                     val uiState by viewModel.uiState.collectAsState()
                     GameListScreen(
                         uiState = uiState,
+                        imageLoader = appContainer.localCoverImageLoader,
                         onQueryChange = viewModel::onQueryChange,
-                        onGenreSelected = viewModel::onGenreSelected,
+                        onPlatformSelected = viewModel::onPlatformSelected,
                         onToggleFavorite = viewModel::toggleFavorite
                     )
                 }
@@ -219,6 +229,26 @@ private fun StarlightAppContent(appContainer: AppContainer) {
         )
     }
 
+    if (folderDialogVisible) {
+        val folderViewModel: GameFolderViewModel = viewModel(
+            factory = viewModelFactory {
+                initializer { GameFolderViewModel(folderRepository = appContainer.gameFolderRepository) }
+            }
+        )
+        val folderUiState by folderViewModel.uiState.collectAsState()
+
+        GameFolderDialog(
+            uiState = folderUiState,
+            onDismiss = { folderDialogVisible = false },
+            onDialogOpened = folderViewModel::onDialogOpened,
+            onFolderPicked = folderViewModel::onFolderPicked,
+            onRemoveFolder = folderViewModel::onRemoveFolder,
+            onRescanFolder = folderViewModel::onRescanFolder,
+            onRescanAll = folderViewModel::onRescanAll,
+            onCancelScan = folderViewModel::onCancelScan
+        )
+    }
+
     // 빠른 시작으로 돌아오면 설정 버튼이 사라지므로, 열려 있던 Dialog도 함께 닫습니다.
     LaunchedEffect(currentRoute) {
         if (!currentRoute.showsSettingsButton) {
@@ -230,7 +260,8 @@ private fun StarlightAppContent(appContainer: AppContainer) {
 @Composable
 private fun StarlightHeader(
     showsSettingsButton: Boolean,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onFolderClick: () -> Unit
 ) {
     val colors = StarlightTheme.colors
 
@@ -274,10 +305,12 @@ private fun StarlightHeader(
             }
         }
 
-        if (showsSettingsButton) {
-            SettingsGearButton(onClick = onSettingsClick)
-        } else {
-            Box(modifier = Modifier.size(44.dp))
+        // 폴더 아이콘은 모든 주요 탭에서 접근 가능해야 하므로 설정 버튼 표시 여부와 무관하게 항상 보입니다.
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            GameFolderIconButton(onClick = onFolderClick)
+            if (showsSettingsButton) {
+                SettingsGearButton(onClick = onSettingsClick, modifier = Modifier.padding(start = 4.dp))
+            }
         }
     }
 }

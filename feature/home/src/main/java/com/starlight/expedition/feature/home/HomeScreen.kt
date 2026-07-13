@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -16,6 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.starlight.expedition.core.common.TimeFormat
+import com.starlight.expedition.core.data.image.LocalCoverImageLoader
+import com.starlight.expedition.core.designsystem.component.EmptyResultState
+import com.starlight.expedition.core.designsystem.component.GameCoverImage
 import com.starlight.expedition.core.designsystem.component.GameListRow
 import com.starlight.expedition.core.designsystem.component.PageHeading
 import com.starlight.expedition.core.designsystem.component.PlayTrailingButton
@@ -29,6 +33,7 @@ import kotlinx.datetime.Clock
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
+    imageLoader: LocalCoverImageLoader,
     onViewAllClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -52,8 +57,8 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             SummaryCard(
-                value = uiState.recentGames.size.toString(),
-                label = "최근 게임",
+                value = uiState.libraryGameCount.toString(),
+                label = "등록 게임",
                 modifier = Modifier.weight(1f)
             )
             SummaryCard(
@@ -86,11 +91,19 @@ fun HomeScreen(
             )
         }
 
-        Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
-            uiState.recentGames.forEachIndexed { index, game ->
-                RecentGameRow(game = game, modifier = Modifier.fillMaxWidth().weight(1f))
-                if (index != uiState.recentGames.lastIndex) {
-                    Spacer(modifier = Modifier.height(11.dp))
+        if (uiState.recentGames.isEmpty() && !uiState.loading) {
+            EmptyResultState(message = "아직 플레이 기록이 없습니다.")
+        } else {
+            Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                uiState.recentGames.forEachIndexed { index, game ->
+                    RecentGameRow(
+                        game = game,
+                        imageLoader = imageLoader,
+                        modifier = Modifier.fillMaxWidth().weight(1f)
+                    )
+                    if (index != uiState.recentGames.lastIndex) {
+                        Spacer(modifier = Modifier.height(11.dp))
+                    }
                 }
             }
         }
@@ -98,7 +111,11 @@ fun HomeScreen(
 }
 
 @Composable
-private fun RecentGameRow(game: Game, modifier: Modifier = Modifier) {
+private fun RecentGameRow(
+    game: Game,
+    imageLoader: LocalCoverImageLoader,
+    modifier: Modifier = Modifier
+) {
     val now = remember { Clock.System.now() }
     val lastPlayedAt = game.lastPlayedAt
     val subtitle = if (lastPlayedAt != null) {
@@ -110,9 +127,18 @@ private fun RecentGameRow(game: Game, modifier: Modifier = Modifier) {
     GameListRow(
         titleKo = game.titleKo,
         subtitle = subtitle,
-        modifier = modifier
+        modifier = modifier,
+        leading = {
+            GameCoverImage(
+                coverUri = game.coverUri,
+                platform = game.platform,
+                imageLoader = imageLoader,
+                contentDescription = "${game.titleKo} 커버",
+                modifier = Modifier.size(60.dp)
+            )
+        }
     ) {
-        // 실제 게임 실행은 1차 개발 범위 밖이라 동작을 연결하지 않습니다.
+        // 실제 게임 실행은 이번 업데이트 범위 밖이라 동작을 연결하지 않습니다.
         PlayTrailingButton(contentDescription = "${game.titleKo} 이어서 하기", onClick = {})
     }
 }

@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * 오늘 플레이 시간은 세션 단위 실측 기록이 1차 개발 범위에 포함되지 않아,
- * 확정 GUI에 표시된 데모 수치를 그대로 사용합니다.
+ * 실제 게임 실행 연동이 아직 없어 세션 단위 플레이 시간을 측정할 수 없습니다.
+ * 스캔한 게임을 실행한 것으로 간주하지 않으므로, 실제 연동 전까지는 항상 0분입니다.
  */
-private const val DEMO_TODAY_PLAY_MINUTES_LABEL = "42분"
+private const val NO_SESSION_TRACKING_LABEL = "0분"
 
 class HomeViewModel(
     gameRepository: GameRepository,
@@ -29,14 +29,16 @@ class HomeViewModel(
     init {
         viewModelScope.launch {
             combine(
-                gameRepository.observeRecentGames(),
+                gameRepository.observeGames(),
+                gameRepository.observeRecentGames(limit = 3),
                 favoritesRepository.observeFavoriteIds()
-            ) { recentGames, favoriteIds ->
+            ) { allGames, recentGames, favoriteIds ->
                 HomeUiState(
                     loading = false,
                     recentGames = recentGames,
+                    libraryGameCount = allGames.size,
                     favoriteCount = favoriteIds.size,
-                    todayPlayMinutesLabel = DEMO_TODAY_PLAY_MINUTES_LABEL
+                    todayPlayMinutesLabel = NO_SESSION_TRACKING_LABEL
                 )
             }
                 .catch { throwable ->

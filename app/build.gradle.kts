@@ -61,6 +61,7 @@ dependencies {
     implementation(project(":feature:favorites"))
     implementation(project(":feature:gamelist"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:library"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

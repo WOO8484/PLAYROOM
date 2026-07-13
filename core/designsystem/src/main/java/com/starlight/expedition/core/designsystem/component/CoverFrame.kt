@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,7 +26,7 @@ import androidx.compose.ui.layout.ContentScale
  * - 오른쪽 위치: 카드 너비의 -13.71% (카드 오른쪽 바깥으로 걸쳐지고 카드 clip으로 잘림)
  * - 프레임 높이: 카드 높이의 74.70%, 비율 1:1
  * - 모서리: 프레임 크기의 29.84%
- * - 기울기: -5도, 내부 이미지는 +5도로 보정
+ * - 기울기: -5도, 내부 콘텐츠는 +5도로 보정
  *
  * 이 Composable을 사용하는 쪽에서 카드 자체에 [Modifier.clip]을 적용해야
  * 카드 바깥으로 나가는 부분이 정상적으로 잘립니다.
@@ -37,6 +38,27 @@ fun CoverFrame(
     modifier: Modifier = Modifier,
     colorFilter: ColorFilter? = null,
     decorationBrush: Brush? = null
+) {
+    CoverFrame(modifier = modifier, decorationBrush = decorationBrush) {
+        Image(
+            painter = painter,
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Crop,
+            colorFilter = colorFilter,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+/**
+ * 실제 게임 커버(비동기로 불러오는 [GameCoverImage] 등)를 넣을 수 있는 범용 버전입니다.
+ * [content]는 프레임을 꽉 채우도록(`Modifier.fillMaxSize()`) 그려야 합니다.
+ */
+@Composable
+fun CoverFrame(
+    modifier: Modifier = Modifier,
+    decorationBrush: Brush? = null,
+    content: @Composable () -> Unit
 ) {
     BoxWithConstraints(modifier = modifier) {
         val cardWidth = maxWidth
@@ -62,17 +84,15 @@ fun CoverFrame(
                     if (decorationBrush != null) frameModifier.background(decorationBrush) else frameModifier
                 }
         ) {
-            Image(
-                painter = painter,
-                contentDescription = contentDescription,
-                contentScale = ContentScale.Crop,
-                colorFilter = colorFilter,
+            Box(
                 modifier = Modifier
                     .size(imageOverscan)
                     .offset(x = -imageShift, y = -imageShift)
                     .graphicsLayer { rotationZ = 5f }
                     .align(Alignment.Center)
-            )
+            ) {
+                content()
+            }
         }
     }
 }

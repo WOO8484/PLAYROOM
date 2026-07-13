@@ -4,7 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.starlight.expedition.core.common.SearchUtils
 import com.starlight.expedition.core.data.repository.GameRepository
-import com.starlight.expedition.core.model.GameGenre
+import com.starlight.expedition.core.model.Game
+import com.starlight.expedition.core.model.Platform
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,8 +19,7 @@ class GameListViewModel(
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")
-    private val selectedGenre = MutableStateFlow<GameGenre?>(null)
-    private val loading = MutableStateFlow(true)
+    private val selectedPlatform = MutableStateFlow<Platform?>(null)
     private val errorMessage = MutableStateFlow<String?>(null)
 
     private val _uiState = MutableStateFlow(GameListUiState())
@@ -29,34 +29,46 @@ class GameListViewModel(
         viewModelScope.launch {
             combine(
                 gameRepository.observeGames().catch { throwable ->
-                    loading.value = false
                     errorMessage.value = throwable.message ?: "게임리스트를 불러오지 못했습니다."
                     emit(emptyList())
                 },
                 query,
-                selectedGenre
-            ) { games, currentQuery, currentGenre ->
+                selectedPlatform
+            ) { games, currentQuery, currentPlatform ->
+                val availablePlatforms = games.map { it.platform }.distinct().sortedBy { it.ordinal }
                 val filtered = games.filter { game ->
-                    SearchUtils.matches(game.titleKo, currentQuery) &&
-                        (currentGenre == null || game.genre == currentGenre)
+                    matchesQuery(game, currentQuery) && (currentPlatform == null || game.platform == currentPlatform)
                 }
+                val sorted = filtered.sortedWith(
+                    compareByDescending<Game> { it.lastPlayedAt != null }
+                        .thenBy { it.titleKo }
+                )
                 GameListUiState(
                     loading = false,
-                    games = filtered,
+                    games = sorted,
                     query = currentQuery,
-                    selectedGenre = currentGenre,
+                    selectedPlatform = currentPlatform,
+                    availablePlatforms = availablePlatforms,
                     errorMessage = errorMessage.value
                 )
             }.collect { state -> _uiState.update { state } }
         }
     }
 
+    private fun matchesQuery(game: Game, currentQuery: String): Boolean {
+        if (currentQuery.isBlank()) return true
+        return SearchUtils.matches(game.titleKo, currentQuery) ||
+            SearchUtils.matches(game.fileName, currentQuery) ||
+            (game.originalTitle?.let { SearchUtils.matches(it, currentQuery) } ?: false) ||
+            SearchUtils.matches(game.platform.displayName, currentQuery)
+    }
+
     fun onQueryChange(newQuery: String) {
         query.value = newQuery
     }
 
-    fun onGenreSelected(genre: GameGenre?) {
-        selectedGenre.value = genre
+    fun onPlatformSelected(platform: Platform?) {
+        selectedPlatform.value = platform
     }
 
     fun toggleFavorite(gameId: String, favorite: Boolean) {
