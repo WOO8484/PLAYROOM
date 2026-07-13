@@ -97,8 +97,9 @@ fun HomeScreen(
 @Composable
 private fun RecentGameRow(game: Game, modifier: Modifier = Modifier) {
     val now = remember { Clock.System.now() }
-    val subtitle = if (game.lastPlayedAt != null) {
-        "${TimeFormat.relativeKorean(game.lastPlayedAt, now)} · ${game.progressLabel ?: "저장됨"}"
+    val lastPlayedAt = game.lastPlayedAt
+    val subtitle = if (lastPlayedAt != null) {
+        "${TimeFormat.relativeKorean(lastPlayedAt, now)} · ${game.progressLabel ?: "저장됨"}"
     } else {
         "아직 플레이 기록이 없습니다"
     }

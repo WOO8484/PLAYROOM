@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -158,8 +160,9 @@ private fun ContinueCard(
             }
 
             val now = remember { Clock.System.now() }
-            val playStatusText = if (game.lastPlayedAt != null) {
-                "마지막 플레이 ${TimeFormat.relativeKorean(game.lastPlayedAt, now)} · ${game.progressLabel ?: "저장됨"}"
+            val lastPlayedAt = game.lastPlayedAt
+            val playStatusText = if (lastPlayedAt != null) {
+                "마지막 플레이 ${TimeFormat.relativeKorean(lastPlayedAt, now)} · ${game.progressLabel ?: "저장됨"}"
             } else {
                 "아직 플레이 기록이 없습니다"
             }
