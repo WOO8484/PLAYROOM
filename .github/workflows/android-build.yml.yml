@@ -1,0 +1,110 @@
+name: Build Android APK With Full Logs
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Prepare environment
+        shell: bash
+        run: |
+          mkdir -p build-logs
+          chmod +x gradlew
+          {
+            echo "=== DATE ==="
+            date -u
+            echo
+            echo "=== ROOT ==="
+            pwd
+            ls -la
+            echo
+            echo "=== JAVA ==="
+            java -version
+            echo
+            echo "=== REQUIRED FILES ==="
+            test -f settings.gradle.kts && echo "OK settings.gradle.kts"
+            test -f build.gradle.kts && echo "OK build.gradle.kts"
+            test -f gradlew && echo "OK gradlew"
+            test -f gradle/wrapper/gradle-wrapper.properties && echo "OK wrapper properties"
+            test -f gradle/wrapper/gradle-wrapper.jar && echo "OK wrapper jar"
+          } > build-logs/environment.log 2>&1
+
+      - name: Build debug APK
+        id: gradle_build
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew             --no-daemon             --stacktrace             --info             --warning-mode all             :app:assembleDebug             2>&1 | tee build-logs/assembleDebug-full.log
+          exit "${PIPESTATUS[0]}"
+
+      - name: Collect error summary and APK locations
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "=== BUILD STEP OUTCOME ==="
+            echo "${{ steps.gradle_build.outcome }}"
+            echo
+            echo "=== FIRST IMPORTANT ERRORS ==="
+            grep -n -m 150 -E               '(^e: |FAILURE:|What went wrong:|Execution failed for task|Caused by:|Could not resolve|Could not find|Unresolved reference|error: )'               build-logs/assembleDebug-full.log || true
+            echo
+            echo "=== LAST 400 LINES ==="
+            tail -n 400 build-logs/assembleDebug-full.log || true
+            echo
+            echo "=== APK SEARCH ==="
+            find . -type f -name "*.apk" -print || true
+          } > build-logs/error-summary.log
+
+          find . -type f -name "*.apk" -print > build-logs/apk-paths.log || true
+
+      - name: Upload full build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: StarlightExpedition-full-build-logs
+          path: build-logs/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload debug APK
+        if: steps.gradle_build.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: StarlightExpedition-debug-apk
+          path: |
+            **/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Mark workflow failed when Gradle failed
+        if: steps.gradle_build.outcome != 'success'
+        shell: bash
+        run: |
+          echo "Gradle build failed."
+          echo "Download artifact: StarlightExpedition-full-build-logs"
+          echo "Open error-summary.log first."
+          exit 1
